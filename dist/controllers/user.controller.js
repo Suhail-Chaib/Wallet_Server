@@ -35,7 +35,7 @@ function registerUser(req, res) {
                 "privateKey": priv,
             });
             let amount = new Amount({
-                "amount": "0",
+                "amount": 0,
                 "n": bc.bigintToBase64(rsa.publicKey.n)
             });
             yield amount.save();

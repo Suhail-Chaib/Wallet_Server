@@ -33,7 +33,7 @@ async function registerUser(req:Request, res:Response) {
             });
 
             let amount = new Amount({
-                "amount": "0",
+                "amount": 0,
                 "n": bc.bigintToBase64(rsa.publicKey.n)
             });  
               

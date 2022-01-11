@@ -11,6 +11,7 @@ router.get('/getPrivateKey/:password', home_controller_1.default.getPrivateKey);
 router.get('/getUser/:password', home_controller_1.default.getUser);
 router.post('/postData2', home_controller_1.default.postSigned);
 router.get('/getData2/:password', home_controller_1.default.getData2);
+router.get('/getData3/:password', home_controller_1.default.getData3);
 router.get('/getAmount/:password', home_controller_1.default.getAmount);
 exports.default = router;
 //# sourceMappingURL=home.routes.js.map

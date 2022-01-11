@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const amountSchema = new mongoose.Schema({
     amount: {
-        type: String
+        type: Number
     },
     n: {
         type: String

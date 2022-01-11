@@ -52,6 +52,23 @@ const getAmount = async (req: Request, res: Response) => {
   }
 
 }
+
+const getData3 = async (req: Request, res: Response) => {
+
+  try{
+     console.log(req.params.password);
+      const results = await User.find({"password": req.params.password});
+      console.log(results[0].publicKey[0].n);
+
+      const data = await Data2.find({"keyA": results[0].publicKey[0].n},{"_id":0, "data":1, "keyB": 1});
+      
+      return res.status(200).json(data);
+      
+  } catch (err) {
+      return res.status(404).json(err);
+  }
+
+}
 const getData2 = async (req: Request, res: Response) => {
 
   try{
@@ -60,6 +77,7 @@ const getData2 = async (req: Request, res: Response) => {
       console.log(results[0].publicKey[0].n);
 
       const data = await Data2.find({"keyB": results[0].publicKey[0].n},{"_id":0, "data":1, "keyA": 1});
+      
       return res.status(200).json(data);
       
   } catch (err) {
@@ -125,13 +143,36 @@ const postSigned = async (req: Request, res: Response) => {
   
   try{
 
-    let data = req.body.data
-    let keyA = req.body.keyA
+    let data = req.body.data;
+    let keyA = req.body.keyA;
     let keyB = req.body.keyB;
 
-    console.log(data);
-    console.log(keyA);
-    console.log(keyB);
+    let e = bc.base64ToBigint("AQAB");
+    let n = bc.base64ToBigint(keyA);
+    const publicKey = new PublicKey(e, n);
+
+    const y = publicKey.verify(bc.base64ToBigint(data));
+    //DINERO A ENVIAR
+    console.log("Text verified: \n" + bc.bigintToText(y));
+
+    let t = parseInt(bc.bigintToText(y))
+    const results = await Amount.find({"n": keyA}, {"_id": 0, "amount": 1});
+    //DINERO EN LA CUENTA
+    console.log(results[0].amount);
+
+    if (bc.bigintToText(y) <= results[0].amount ){
+      let update = results[0].amount - t;
+      console.log(update);
+
+      //Amount.updateMany({"n": keyA}, {$set:{"amount": update}});
+
+      const res = await Amount.find({"n": keyB}, {"_id": 0, "amount": 1});
+      console.log(res[0].amount);
+      let up = res[0].amount + t;
+      console.log(up);
+
+     // Amount.updateMany({"n": keyB}, {$set:{"amount": up}});
+    }
 
     let info = new Data2({
       "data": data,
@@ -203,4 +244,4 @@ const postEncrypted = async (req: Request, res: Response) => {
 
 }
 
-export default {generatePublicKey, getPublicKey, postEncrypted, getData, getPrivateKey, getUser, postSigned, getData2, getAmount}
+export default {generatePublicKey, getPublicKey, postEncrypted, getData, getPrivateKey, getUser, postSigned, getData2, getAmount, getData3}

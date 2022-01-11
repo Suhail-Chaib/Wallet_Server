@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 //Modelo de objeto que se guarda en la BBDD de MongoDB
 const amountSchema = new mongoose.Schema({
     amount: {
-        type: String
+        type: Number
     },
     n:{
         type: String
@@ -12,7 +12,7 @@ const amountSchema = new mongoose.Schema({
 
 //Interfaz para tratar respuesta como documento
 export interface Iamount extends Document {
-    amount: String;
+    amount: Number;
     n: String
 }
 
