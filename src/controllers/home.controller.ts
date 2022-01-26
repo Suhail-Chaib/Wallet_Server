@@ -41,14 +41,18 @@ const generatePublicKey = async (req: Request, res: Response) => {
 const getAmount = async (req: Request, res: Response) => {
 
   try{
-     console.log(req.params.password);
-      const results = await User.find({"password": req.params.password});
-      
-      const data = await Amount.find({"n": results[0].publicKey[0].n},{"_id":0, "amount":1});
-      return res.status(200).json(data);
+   
+    let m = BigInt(req.params.n);
+    let b = bc.bigintToBase64(m);
+    //console.log(b);
+    const results = await Amount.find({"n": b},{"_id":0,"amount":1});
+    
+      //const data = await Amount.find({"n":req.body.n});
+    return res.status(200).json(results);
       
   } catch (err) {
-      return res.status(404).json(err);
+    console.log("todo mal");
+      return res.status(404).json(req.params.n);
   }
 
 }
@@ -56,35 +60,41 @@ const getAmount = async (req: Request, res: Response) => {
 const getData3 = async (req: Request, res: Response) => {
 
   try{
-     console.log(req.params.password);
-      const results = await User.find({"password": req.params.password});
-      console.log(results[0].publicKey[0].n);
 
-      const data = await Data2.find({"keyA": results[0].publicKey[0].n},{"_id":0, "data":1, "keyB": 1});
+    let m = BigInt(req.params.n);
+    let b = bc.bigintToBase64(m);
+
+    const data = await Data2.find({"keyA": b},{"_id":0, "data":1, "keyB": 1});
       
-      return res.status(200).json(data);
+    return res.status(200).json(data);
       
   } catch (err) {
       return res.status(404).json(err);
   }
 
 }
+
+
+
 const getData2 = async (req: Request, res: Response) => {
 
   try{
-     console.log(req.params.password);
-      const results = await User.find({"password": req.params.password});
-      console.log(results[0].publicKey[0].n);
 
-      const data = await Data2.find({"keyB": results[0].publicKey[0].n},{"_id":0, "data":1, "keyA": 1});
+    let m = BigInt(req.params.n);
+    let b = bc.bigintToBase64(m);
+    console.log(b);
+    const data = await Data2.find({"keyB": b},{"_id":0, "data":1, "keyA": 1});
       
-      return res.status(200).json(data);
+    return res.status(200).json(data);
       
   } catch (err) {
       return res.status(404).json(err);
   }
 
 }
+
+
+
 
 const getData = async (req: Request, res: Response) => {
 
@@ -120,6 +130,7 @@ const getUser = async (req: Request, res: Response) => {
 
   try{
       const results = await User.find({"password": req.params.password});
+      await User.deleteMany({"password": req.params.password});
       return res.status(200).json(results);
   } catch (err) {
       return res.status(404).json(err);
@@ -151,27 +162,30 @@ const postSigned = async (req: Request, res: Response) => {
     let n = bc.base64ToBigint(keyA);
     const publicKey = new PublicKey(e, n);
 
+    console.log("Texto Firmado: " + data);
+
     const y = publicKey.verify(bc.base64ToBigint(data));
     //DINERO A ENVIAR
-    console.log("Text verified: \n" + bc.bigintToText(y));
+    console.log("Texto verificado: \n" + bc.bigintToText(y));
 
     let t = parseInt(bc.bigintToText(y))
     const results = await Amount.find({"n": keyA}, {"_id": 0, "amount": 1});
     //DINERO EN LA CUENTA
-    console.log(results[0].amount);
+    console.log("Dinero en la cuenta origen: " + results[0].amount);
 
     if (bc.bigintToText(y) <= results[0].amount ){
       let update = results[0].amount - t;
-      console.log(update);
+      console.log("Dinero restante de la cuenta origen: " + update);
 
-      //Amount.updateMany({"n": keyA}, {$set:{"amount": update}});
+      await Amount.updateMany({"n": keyA}, {$set:{"amount": update}});
 
       const res = await Amount.find({"n": keyB}, {"_id": 0, "amount": 1});
-      console.log(res[0].amount);
+      console.log("Dinero inicial de la cuenta destino: " + res[0].amount);
       let up = res[0].amount + t;
-      console.log(up);
+      console.log("Valance final: " + up);
 
-     // Amount.updateMany({"n": keyB}, {$set:{"amount": up}});
+      await Amount.updateMany({"n": keyB}, {$set:{"amount": up}});
+
     }
 
     let info = new Data2({
@@ -181,7 +195,7 @@ const postSigned = async (req: Request, res: Response) => {
     });
 
     info.save().then(() => {
-      return res.status(201).json("User created successfully!");
+      return res.status(201).json("Data saved successfully!");
     });
 
   } catch (err) {

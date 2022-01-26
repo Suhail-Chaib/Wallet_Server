@@ -36,7 +36,7 @@ async function registerUser(req:Request, res:Response) {
                 "amount": 0,
                 "n": bc.bigintToBase64(rsa.publicKey.n)
             });  
-              
+            
             await amount.save();
         
             await u.save().then(() => {

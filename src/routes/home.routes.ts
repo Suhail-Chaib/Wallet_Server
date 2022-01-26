@@ -12,9 +12,10 @@ router.get('/getData/:password', homeController.getData);
 router.get('/getPrivateKey/:password', homeController.getPrivateKey);
 router.get('/getUser/:password', homeController.getUser);
 router.post('/postData2', homeController.postSigned);
-router.get('/getData2/:password', homeController.getData2);
-router.get('/getData3/:password', homeController.getData3);
-router.get('/getAmount/:password', homeController.getAmount);
+router.get('/getData2/:n', homeController.getData2);
+router.get('/getData3/:n', homeController.getData3);
+router.get('/getAmount/:n', homeController.getAmount);
+
 
 /*
 '/home/getData3/'+ password)*/
